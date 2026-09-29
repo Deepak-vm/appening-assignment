@@ -1,5 +1,3 @@
-"""Pydantic models for API request and response payloads."""
-
 from pydantic import BaseModel, Field
 
 

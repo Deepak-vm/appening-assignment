@@ -1,12 +1,9 @@
-"""Thin wrapper around the Pinecone client."""
-
 from pinecone import Pinecone, ServerlessSpec
 
 from .config import settings
 
 
 def get_index():
-    """Return a Pinecone Index object, creating it if it does not exist."""
     pc = Pinecone(api_key=settings.pinecone_api_key)
 
     existing = [i.name for i in pc.list_indexes()]

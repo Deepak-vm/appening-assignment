@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    google_api_key: str
+    gemini_api_key: str
     groq_api_key: str
     pinecone_api_key: str
     pinecone_index_name: str = "agentic-ai-rag"
@@ -15,12 +15,12 @@ class Settings(BaseSettings):
     top_k: int = 5
     relevance_threshold: float = 0.35
 
-    # Gemini embedding model — text-embedding-004 outputs 768 dimensions
-    embedding_model: str = "models/text-embedding-004"
-    embedding_dim: int = 768
+    # gemini-embedding-2 outputs 3072 dimensions
+    embedding_model: str = "gemini-embedding-2"
+    embedding_dim: int = 3072
 
     # LLM via Groq
-    llm_model: str = "llama3-8b-8192"
+    llm_model: str = "openai/gpt-oss-20b"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

@@ -1,6 +1,7 @@
 import hashlib
 import logging
 import sys
+import time
 from pathlib import Path
 
 import fitz  # PyMuPDF
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 _embedder = GoogleGenerativeAIEmbeddings(
     model=settings.embedding_model,
-    google_api_key=settings.google_api_key,
+    google_api_key=settings.gemini_api_key,
 )
 
 
@@ -83,6 +84,10 @@ def ingest(pdf_path: Path) -> int:
         index.upsert(vectors=records)
         upserted += len(records)
         logger.info("Upserted %d / %d chunks", upserted, len(chunks))
+        # gemini-embedding-2 free tier: 100 requests/min. Sleep between batches.
+        if start + batch_size < len(chunks):
+            logger.info("Rate-limit pause: sleeping 65 s")
+            time.sleep(65)
 
     return upserted
 

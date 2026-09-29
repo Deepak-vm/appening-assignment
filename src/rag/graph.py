@@ -11,7 +11,7 @@ from .vectorstore import get_index
 
 _embedder = GoogleGenerativeAIEmbeddings(
     model=settings.embedding_model,
-    google_api_key=settings.google_api_key,
+    google_api_key=settings.gemini_api_key,
 )
 _llm = ChatGroq(api_key=settings.groq_api_key, model=settings.llm_model)
 
