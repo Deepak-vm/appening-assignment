@@ -1,21 +1,24 @@
-"""Load a PDF page-by-page, chunk it, embed it, and upsert into Pinecone."""
-
 import hashlib
 import logging
 import sys
 from pathlib import Path
 
 import fitz  # PyMuPDF
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from openai import OpenAI
 
 from .config import settings
 from .vectorstore import get_index
 
 logger = logging.getLogger(__name__)
 
+_embedder = GoogleGenerativeAIEmbeddings(
+    model=settings.embedding_model,
+    google_api_key=settings.google_api_key,
+)
 
-def _load_pages(pdf_path: Path) -> list[tuple[int, str]]:
+
+def load_pages(pdf_path: Path) -> list[tuple[int, str]]:
     """Return a list of (page_number, text) tuples (1-indexed page numbers)."""
     doc = fitz.open(str(pdf_path))
     pages = []
@@ -26,7 +29,7 @@ def _load_pages(pdf_path: Path) -> list[tuple[int, str]]:
     return pages
 
 
-def _chunk_pages(
+def chunk_pages(
     pages: list[tuple[int, str]],
     source_name: str,
 ) -> list[dict]:
@@ -51,21 +54,16 @@ def _chunk_pages(
     return chunks
 
 
-def _embed(texts: list[str]) -> list[list[float]]:
-    """Embed a batch of texts using the configured OpenAI model."""
-    client = OpenAI(api_key=settings.openai_api_key)
-    response = client.embeddings.create(
-        model=settings.embedding_model,
-        input=texts,
-    )
-    return [item.embedding for item in response.data]
+def embed(texts: list[str]) -> list[list[float]]:
+    """Embed a batch of texts using the Gemini embedding model."""
+    return _embedder.embed_documents(texts)
 
 
 def ingest(pdf_path: Path) -> int:
     """Full ingestion pipeline. Returns the number of vectors upserted."""
     logger.info("Loading %s", pdf_path)
-    pages = _load_pages(pdf_path)
-    chunks = _chunk_pages(pages, source_name=pdf_path.name)
+    pages = load_pages(pdf_path)
+    chunks = chunk_pages(pages, source_name=pdf_path.name)
 
     index = get_index()
     batch_size = 100
@@ -73,7 +71,7 @@ def ingest(pdf_path: Path) -> int:
 
     for start in range(0, len(chunks), batch_size):
         batch = chunks[start : start + batch_size]
-        vectors = _embed([c["text"] for c in batch])
+        vectors = embed([c["text"] for c in batch])
         records = [
             {
                 "id": c["id"],

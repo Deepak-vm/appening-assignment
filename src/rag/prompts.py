@@ -1,4 +1,6 @@
-"""System and human prompt templates for the RAG pipeline."""
+NOT_FOUND_MESSAGE = (
+    "The document does not contain enough information to answer this question."
+)
 
 SYSTEM_PROMPT = """\
 You are a precise assistant. Answer the user's question using ONLY the context \

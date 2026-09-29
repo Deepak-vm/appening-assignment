@@ -1,10 +1,9 @@
-"""Application settings loaded from environment variables."""
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    openai_api_key: str
+    google_api_key: str
+    groq_api_key: str
     pinecone_api_key: str
     pinecone_index_name: str = "agentic-ai-rag"
 
@@ -16,12 +15,12 @@ class Settings(BaseSettings):
     top_k: int = 5
     relevance_threshold: float = 0.35
 
-    # Embedding model and its output dimension
-    embedding_model: str = "text-embedding-3-small"
-    embedding_dim: int = 1536
+    # Gemini embedding model — text-embedding-004 outputs 768 dimensions
+    embedding_model: str = "models/text-embedding-004"
+    embedding_dim: int = 768
 
-    # LLM
-    llm_model: str = "gpt-4o-mini"
+    # LLM via Groq
+    llm_model: str = "llama3-8b-8192"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
